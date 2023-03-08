@@ -1,0 +1,3 @@
+[workspace]
+
+members = ["opentitan-lib", "opentitan-macros", "app"]
