@@ -5,7 +5,9 @@
 use core::{arch::asm, panic::PanicInfo};
 pub use opentitan_macros::entry;
 
-/// Specifies the
+pub mod devices;
+
+/// Specifies the stack size
 #[no_mangle]
 #[link_section = ".stack_buffer"]
 pub static mut STACK_MEMORY: [u8; 0x1000] = [0; 0x1000];
@@ -89,7 +91,7 @@ pub extern "C" fn _start() {
 }
 
 #[panic_handler]
-pub fn panic_handler(_: &PanicInfo) -> ! {
+pub fn _default_panic_handler(_: &PanicInfo) -> ! {
     unsafe {
         asm!(
             "

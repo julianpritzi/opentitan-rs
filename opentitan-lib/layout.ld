@@ -1,9 +1,3 @@
-/* 
-
-TODO: finish adapting ld script & try to run on verilator
-
-*/
-
 SECTIONS
 {
    .stack (NOLOAD) :

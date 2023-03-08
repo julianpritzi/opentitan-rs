@@ -1,7 +1,8 @@
 #!/bin/bash
 
-TARGET_DIR="$(dirname "${1}")"/../../
-BUILD_DIR="$TARGET_DIR"/verilator/
+PROJECT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )"/.. &> /dev/null && pwd )
+BUILD_DIR="$PROJECT_DIR"/target/verilator/
+OPENTITAN_PATH="${OPENTITAN_PATH:=$PROJECT_DIR/opentitan/}"
 
 if [ -d "$BUILD_DIR" ]; then
     rm -R "$BUILD_DIR"

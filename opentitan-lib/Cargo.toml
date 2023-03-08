@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 riscv = "0.10.1"
 opentitan-macros = { path = "../opentitan-macros" }
+tock-registers = "^0.8"

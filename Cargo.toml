@@ -1,3 +1,4 @@
 [workspace]
 
 members = ["opentitan-lib", "opentitan-macros", "app"]
+default-members = ["app"]

@@ -3,7 +3,7 @@ MEMORY
   rom   (rx)  : ORIGIN = 0x20000000, LENGTH = 0x90000
   
   /* The first 0x650 bytes of RAM are reserved for the boot ROM */
-  ram   (!rx) : ORIGIN = 0x10000650, LENGTH = 0x10000 - 0x650
+  ram   (!rx) : ORIGIN = 0x10000650, LENGTH = 0x20000 - 0x650
 }
 
 SECTIONS {
