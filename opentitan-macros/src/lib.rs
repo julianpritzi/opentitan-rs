@@ -2,7 +2,9 @@ use std::{env, path::PathBuf};
 
 use proc_macro::TokenStream;
 
+mod addresses;
 mod entry;
+mod hjson_sanitizer;
 mod registers;
 
 /// Attribute to declare the entry point of the program
@@ -18,6 +20,11 @@ pub fn entry(args: TokenStream, input: TokenStream) -> TokenStream {
 #[proc_macro_attribute]
 pub fn registers(args: TokenStream, item: TokenStream) -> TokenStream {
     registers::registers(args, item)
+}
+
+#[proc_macro]
+pub fn addresses(args: TokenStream) -> TokenStream {
+    addresses::addresses(args)
 }
 
 fn get_opentitan_path() -> PathBuf {

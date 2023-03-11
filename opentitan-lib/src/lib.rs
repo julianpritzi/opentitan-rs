@@ -2,10 +2,15 @@
 #![no_main]
 #![feature(naked_functions)]
 
+pub mod devices;
+pub mod print;
+pub mod synch;
+
+#[cfg(feature = "alloc")]
+mod alloc;
+
 use core::{arch::asm, panic::PanicInfo};
 pub use opentitan_macros::entry;
-
-pub mod devices;
 
 /// Specifies the stack size
 #[no_mangle]
@@ -31,6 +36,8 @@ extern "C" {
 
     /// End address of text section
     static _etext: usize;
+
+    pub fn main();
 }
 
 #[link_section = ".start"]
@@ -76,7 +83,7 @@ pub extern "C" fn _start() {
             j    200b
             201: // init data loop end
 
-            j main
+            j _init
             ",
             gp = sym __global_pointer,
             estack = sym _estack,
@@ -87,6 +94,18 @@ pub extern "C" fn _start() {
             etext = sym _etext,
             options(noreturn)
         );
+    }
+}
+
+#[export_name = "_init"]
+pub unsafe extern "C" fn _init() -> ! {
+    #[cfg(feature = "alloc")]
+    {
+        // TODO: init heap
+    }
+    // TODO: Setup stdout
+    unsafe {
+        asm!("j main", options(noreturn));
     }
 }
 

@@ -13,3 +13,4 @@ syn = { version = "^1.0", features = ["full", "extra-traits"] }
 deser-hjson = "^1.1"
 serde = "^1.0"
 tock-registers = "^0.8"
+regex = "^1.7"

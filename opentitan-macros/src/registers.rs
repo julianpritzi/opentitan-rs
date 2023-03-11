@@ -6,7 +6,7 @@ use quote::{format_ident, quote};
 use serde::Deserialize;
 use syn::{parse, parse_macro_input, ItemStruct, LitStr};
 
-use crate::get_opentitan_path;
+use crate::{get_opentitan_path, hjson_sanitizer};
 
 pub fn registers(args: TokenStream, item: TokenStream) -> TokenStream {
     // Compute path of Opentitan repo
@@ -20,10 +20,21 @@ pub fn registers(args: TokenStream, item: TokenStream) -> TokenStream {
             .to_compile_error()
             .into();
     };
-    let Ok(ip) = deser_hjson::from_str::<IPDescription>(&file_content) else {
-        return parse::Error::new(Span::call_site(), format!("Can not parse file {:?} as IPDescription in HJSON format", &path))
+    // Parse file content
+    let ip = match deser_hjson::from_str::<IPDescription>(&hjson_sanitizer::sanitize(file_content))
+    {
+        Ok(ip) => ip,
+        Err(error) => {
+            return parse::Error::new(
+                Span::call_site(),
+                format!(
+                    "Can not parse file {:?} as IPDescription in HJSON format | \n {}",
+                    &path, error
+                ),
+            )
             .to_compile_error()
-            .into();
+            .into()
+        }
     };
 
     // Static info for generation
@@ -67,15 +78,13 @@ pub fn registers(args: TokenStream, item: TokenStream) -> TokenStream {
     .into()
 }
 
-// TODO: FIX DOCUMENTATION GENERATION
-
 /// Generates the interrupt & alert register descriptions
 fn gen_interrupt_alert_registers(register_counter: &mut usize) -> proc_macro2::TokenStream {
     let docs = vec![
-        "Interrupt State register",
-        "Interrupt Enable register",
-        "Interrupt Test register",
-        "Alert Test register",
+        "([`intr`]) Interrupt State register",
+        "([`intr`]) Interrupt Enable register",
+        "([`intr`]) Interrupt Test register",
+        "([`alert`]) Alert Test register",
     ];
     let offsets = vec![
         *register_counter,
@@ -100,7 +109,7 @@ fn gen_interrupt_alert_registers(register_counter: &mut usize) -> proc_macro2::T
     quote!(
         #(
             #[doc = #docs]
-            (#offsets => #names: tock_registers::registers::ReadWrite<u32, #types::Register>),
+            (#offsets => pub #names: tock_registers::registers::ReadWrite<u32, #types::Register>),
         )*
     )
 }
@@ -118,7 +127,8 @@ fn gen_interrupt_alert_bitfields(
     let docs = list.iter().map(|x| x.desc.clone());
 
     quote!(
-        #name [
+        /// All the submodules/constants represent parts of the content of this register
+        pub #name [
             #(
                 #[doc = #docs]
                 #names OFFSET(#offsets) NUMBITS(1) []
@@ -128,6 +138,10 @@ fn gen_interrupt_alert_bitfields(
 }
 
 // TODO: support multi register & skipto
+//
+// for window: look at items
+// for multireg: look at count & cross reference with paramaters
+// for skipto direct
 
 /// Generates standard register descriptions
 fn gen_register(
@@ -150,17 +164,22 @@ fn gen_register(
             .into();
         }
     };
-    let doc = &register_description.desc;
 
     if register_description.fields.is_empty() {
+        let doc = &register_description.desc;
         quote!(
             #[doc = #doc]
-            (#address => #name: tock_registers::registers::#reg_type<u32>),
+            (#address => pub #name: tock_registers::registers::#reg_type<u32>),
         )
     } else {
+        let doc = format!(
+            "([`{}`]) {}",
+            register_description.name.to_lowercase(),
+            &register_description.desc
+        );
         quote!(
             #[doc = #doc]
-            (#address => #name: tock_registers::registers::#reg_type<u32, #name::Register>),
+            (#address => pub #name: tock_registers::registers::#reg_type<u32, #name::Register>),
         )
     }
 }
@@ -192,7 +211,8 @@ fn gen_bitfield(register_description: &RegisterDescription) -> Option<proc_macro
         None
     } else {
         Some(quote!(
-            #reg_name [
+            /// All the submodules/constants represent parts of the content of this register
+            pub #reg_name [
                 #(
                     #[doc = #docs]
                     #names OFFSET(#offsets) NUMBITS(#numbits) []
@@ -238,9 +258,11 @@ struct RegisterDescription {
     fields: Vec<FieldDescription>,
 }
 
+#[allow(dead_code)]
 #[derive(Deserialize)]
 struct FieldDescription {
     bits: String,
     name: Option<String>,
     desc: Option<String>,
+    resval: Option<String>,
 }

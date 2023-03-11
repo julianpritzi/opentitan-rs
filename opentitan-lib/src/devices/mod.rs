@@ -1,12 +1,23 @@
-pub mod uart {
-    use opentitan_macros::registers;
+pub mod aes;
+pub mod csrng;
+pub mod hmac;
+pub mod kmac;
+pub mod otbn;
+pub mod uart;
 
-    #[registers("hw/ip/uart/data/uart.hjson")]
-    pub struct Uart;
+use opentitan_macros::addresses;
 
-    pub const UART0: *const Uart = 0x40000 as *const Uart;
+addresses!("hw/top_earlgrey/data/top_earlgrey.hjson");
 
-    pub unsafe fn test() {
-        unimplemented!()
-    }
+/// Verilator platform constants
+///
+/// TODO: allow target platform selection using features
+pub mod platform {
+    pub const CPU_FREQ: usize = 500_000;
+    pub const HIGH_SPEED_PERIPHERAL_FREQ: usize = 500_000;
+    pub const PERIPHERAL_FREQ: usize = 125_000;
+    pub const USB_FREQ: usize = 500_000;
+    pub const AON_FREQ: usize = 125_000;
+
+    pub const UART_BAUD_RATE: usize = 7200;
 }
