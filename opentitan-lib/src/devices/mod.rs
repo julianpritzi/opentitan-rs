@@ -1,7 +1,6 @@
 pub mod aes;
 pub mod csrng;
 pub mod hmac;
-pub mod kmac;
 pub mod otbn;
 pub mod uart;
 
