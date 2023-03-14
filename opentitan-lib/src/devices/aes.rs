@@ -15,7 +15,7 @@ const AES: *const AesRegisters = addresses::AES as *const AesRegisters;
 
 /// Returns a pointer to the registers of the aes IP
 ///
-/// This should only be used if either [`RawAes`] or [`Aes`] do not meet the
+/// This should only be used if either [`AesRaw`] or [`Aes`] do not meet the
 /// requirements (eg. performance or functionality)
 ///
 /// # Safety

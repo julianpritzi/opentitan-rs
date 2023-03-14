@@ -24,7 +24,8 @@ impl Lock {
             } else {
                 Err(())
             };
-            riscv::interrupt::enable();
+            // TODO: enable once interrupts are supported
+            // riscv::interrupt::enable();
             res
         }
     }
@@ -44,6 +45,10 @@ pub struct Mutex<T> {
 }
 
 impl<T> Mutex<T> {
+    pub const fn new(lock: *mut Lock, elem: *mut T) -> Mutex<T> {
+        Mutex { lock, elem }
+    }
+
     pub fn try_acquire(&mut self) -> Result<MutexHandle<T>, ()> {
         unsafe {
             if (*self.lock).try_lock().is_ok() {

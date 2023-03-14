@@ -15,7 +15,7 @@ const OTBN: *const OtbnRegisters = addresses::OTBN as *const OtbnRegisters;
 
 /// Returns a pointer to the registers of the otbn IP
 ///
-/// This should only be used if either [`RawOtbn`] or [`Otbn`] do not meet the
+/// This should only be used if either [`OtbnRaw`] or [`Otbn`] do not meet the
 /// requirements (eg. performance or functionality)
 ///
 /// # Safety

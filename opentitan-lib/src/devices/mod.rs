@@ -18,5 +18,5 @@ pub mod platform {
     pub const USB_FREQ: usize = 500_000;
     pub const AON_FREQ: usize = 125_000;
 
-    pub const UART_BAUD_RATE: usize = 7200;
+    pub const UART_BAUD_RATE: u32 = 7200;
 }

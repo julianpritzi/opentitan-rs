@@ -99,19 +99,32 @@ pub extern "C" fn _start() {
 
 #[export_name = "_init"]
 pub unsafe extern "C" fn _init() -> ! {
+    print::redirect_stdout(devices::uart::get_uart0().expect("Could not acquire uart for stdout"));
     #[cfg(feature = "alloc")]
     {
         // TODO: init heap
+        #[cfg(feature = "verbose_logging")]
+        {
+            log!("Heap set up");
+        }
     }
-    // TODO: Setup stdout
+
+    #[cfg(feature = "verbose_logging")]
+    log!("Finished library initialization, jumping to entry");
+
     unsafe {
         asm!("j main", options(noreturn));
     }
 }
 
 #[panic_handler]
-pub fn _default_panic_handler(_: &PanicInfo) -> ! {
+pub fn _default_panic_handler(info: &PanicInfo) -> ! {
+    use core::fmt::Write;
     unsafe {
+        riscv::interrupt::disable();
+        let mut out = devices::uart::get_panic_uart();
+        let _ = writeln!(out, "[Panic] {}", info);
+
         asm!(
             "
             100: 

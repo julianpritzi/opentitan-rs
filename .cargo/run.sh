@@ -20,7 +20,7 @@ srec_cat "$BUILD_DIR"/opentitan-app.bin\
 cd "$BUILD_DIR"
 
 riscv32-unknown-elf-readelf -a opentitan-app.elf > opentitan-app.readelf
-riscv32-unknown-elf-objdump -CD opentitan-app.elf > opentitan-app.objdump
+riscv32-unknown-elf-objdump -Cd opentitan-app.elf > opentitan-app.objdump
 
 ../../opentitan/bazel-out/k8-fastbuild/bin/hw/build.verilator_real/sim-verilator/Vchip_sim_tb \
 		--meminit=rom,../../opentitan/bazel-out/k8-fastbuild-ST-2cc462681f62/bin/sw/device/lib/testing/test_rom/test_rom_sim_verilator.39.scr.vmem \

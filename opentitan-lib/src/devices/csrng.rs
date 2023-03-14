@@ -15,7 +15,7 @@ const CSRNG: *const CsrngRegisters = addresses::CSRNG as *const CsrngRegisters;
 
 /// Returns a pointer to the registers of the csrng IP
 ///
-/// This should only be used if either [`RawCsrng`] or [`Csrng`] do not meet the
+/// This should only be used if either [`CsrngRaw`] or [`Csrng`] do not meet the
 /// requirements (eg. performance or functionality)
 ///
 /// # Safety

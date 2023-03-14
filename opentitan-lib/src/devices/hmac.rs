@@ -15,7 +15,7 @@ const HMAC: *const HmacRegisters = addresses::HMAC as *const HmacRegisters;
 
 /// Returns a pointer to the registers of the hmac IP
 ///
-/// This should only be used if either [`RawHmac`] or [`Hmac`] do not meet the
+/// This should only be used if either [`HmacRaw`] or [`Hmac`] do not meet the
 /// requirements (eg. performance or functionality)
 ///
 /// # Safety
