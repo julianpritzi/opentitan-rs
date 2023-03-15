@@ -9,7 +9,7 @@ pub mod synch;
 #[cfg(feature = "alloc")]
 mod alloc;
 
-use core::{arch::asm, panic::PanicInfo};
+use core::{arch::asm, panic::PanicInfo, ptr};
 pub use opentitan_macros::entry;
 
 /// Specifies the stack size
@@ -28,6 +28,11 @@ extern "C" {
     static _szero: usize;
     /// End address of BSS section (exclusive)
     static _ezero: usize;
+
+    /// Start address of heap
+    static _sheap: usize;
+    /// End address of heap
+    static _eheap: usize;
 
     /// Start address of data section
     static _srelocate: usize;
@@ -102,10 +107,11 @@ pub unsafe extern "C" fn _init() -> ! {
     print::redirect_stdout(devices::uart::get_uart0().expect("Could not acquire uart for stdout"));
     #[cfg(feature = "alloc")]
     {
-        // TODO: init heap
+        let heap_size = (ptr::addr_of!(_eheap) as usize) - (ptr::addr_of!(_sheap) as usize);
+        crate::alloc::ALLOCATOR.init(ptr::addr_of!(_sheap) as *mut u8, heap_size);
         #[cfg(feature = "verbose_logging")]
         {
-            log!("Heap set up");
+            log!("Heap set up with size {:#x}", heap_size);
         }
     }
 

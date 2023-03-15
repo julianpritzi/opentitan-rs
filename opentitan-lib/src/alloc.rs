@@ -10,19 +10,19 @@ use linked_list_allocator::Heap;
 
 /// CustomHeap implementation handling the allocations on the heap
 #[global_allocator]
-static ALLOCATOR: CustomHeap = CustomHeap::empty();
+pub(crate) static ALLOCATOR: CustomHeap = CustomHeap::empty();
 
 /// Since the architecture is assumed to be on a single core and without atomic instructions
 /// the GlobalAlloc Trait has to be manually implemented for Heap, therefore we define this
 /// Wrapper type
-struct CustomHeap(RefCell<Heap>);
+pub(crate) struct CustomHeap(RefCell<Heap>);
 
 impl CustomHeap {
     const fn empty() -> CustomHeap {
         CustomHeap(RefCell::new(Heap::empty()))
     }
 
-    unsafe fn init(&self, heap_bottom: *mut u8, heap_size: usize) {
+    pub(crate) unsafe fn init(&self, heap_bottom: *mut u8, heap_size: usize) {
         self.0.borrow_mut().init(heap_bottom, heap_size)
     }
 }

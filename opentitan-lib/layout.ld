@@ -3,12 +3,12 @@ SECTIONS
    .stack (NOLOAD) :
     {
         . = ALIGN(8);
-         _sstack = .;
+        _sstack = .;
 
-         KEEP(*(.stack_buffer))
+        KEEP(*(.stack_buffer))
 
-         . = ALIGN(8);
-         _estack = .;
+        . = ALIGN(8);
+        _estack = .;
     } > ram
 
     .text :
@@ -57,6 +57,17 @@ SECTIONS
 
         . = ALIGN(4);
         _ezero = .;
+    } > ram
+
+    .heap (NOLOAD) :
+    {
+        . = ALIGN(8);
+        _sheap = .;
+
+        . = ORIGIN(ram) + LENGTH(ram) - 0x10;
+        
+        . = ALIGN(8);
+        _eheap = .;
     } > ram
 
     /DISCARD/ :

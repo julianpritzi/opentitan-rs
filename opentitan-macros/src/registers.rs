@@ -8,7 +8,7 @@ use syn::{parse, parse_macro_input, ItemStruct, LitStr};
 
 use crate::{get_opentitan_path, hjson_sanitizer};
 
-// TODO: Refactor and make more robust
+// TODO: Refactor and make more robust by using reggen from opentitan
 
 pub fn registers(args: TokenStream, item: TokenStream) -> TokenStream {
     // Compute path of Opentitan repo
