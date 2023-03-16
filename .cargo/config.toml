@@ -1,6 +1,10 @@
 [build]
-target = "riscv32imc-unknown-none-elf"
+target = "riscv32imac-unknown-none-elf"
 
 [target.riscv32imc-unknown-none-elf]
+rustflags = ["-C", "link-arg=-Tmemory.ld"]
+runner = ".cargo/run.sh"
+
+[target.riscv32imac-unknown-none-elf]
 rustflags = ["-C", "link-arg=-Tmemory.ld"]
 runner = ".cargo/run.sh"

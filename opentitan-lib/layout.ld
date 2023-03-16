@@ -16,7 +16,6 @@ SECTIONS
         . = ALIGN(4);
         _stext = .;
         KEEP(*(.start));
-        ALIGN(256)
         KEEP(*(.trap_vectored));
         KEEP(*(.trap));
 

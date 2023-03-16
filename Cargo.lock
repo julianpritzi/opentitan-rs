@@ -83,6 +83,7 @@ dependencies = [
  "linked_list_allocator",
  "opentitan-macros",
  "riscv",
+ "riscv-atomic-emulation-trap",
  "tock-registers",
 ]
 
@@ -144,6 +145,12 @@ dependencies = [
  "critical-section",
  "embedded-hal",
 ]
+
+[[package]]
+name = "riscv-atomic-emulation-trap"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "da39f4a5642a62e8e16bb438c37e6f90ea388ca0b7960fe875ea39887155d6ba"
 
 [[package]]
 name = "serde"

@@ -3,14 +3,17 @@
 #![feature(naked_functions)]
 
 pub mod devices;
+pub mod interrupt;
 pub mod print;
 pub mod synch;
 
 #[cfg(feature = "alloc")]
 mod alloc;
+mod atomic;
 
 use core::{arch::asm, panic::PanicInfo, ptr};
 pub use opentitan_macros::entry;
+use riscv::register::mtvec;
 
 /// Specifies the stack size
 #[no_mangle]
@@ -41,6 +44,9 @@ extern "C" {
 
     /// End address of text section
     static _etext: usize;
+
+    /// Start address of trap vector
+    static _trap_vector: usize;
 
     pub fn main();
 }
@@ -114,6 +120,11 @@ pub unsafe extern "C" fn _init() -> ! {
             log!("Heap set up with size {:#x}", heap_size);
         }
     }
+
+    mtvec::write(
+        ptr::addr_of!(_trap_vector) as usize,
+        riscv::register::utvec::TrapMode::Vectored,
+    );
 
     #[cfg(feature = "verbose_logging")]
     log!("Finished library initialization, jumping to entry");

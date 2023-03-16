@@ -49,6 +49,7 @@ macro_rules! println {
 macro_rules! log {
     ($($arg:tt)*) => (
         {
+            use $crate::{print, println};
             print!("[{}:{}] ", file!(), line!());
             println!($($arg)*);
         }
