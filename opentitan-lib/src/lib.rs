@@ -24,7 +24,7 @@ use riscv::register::mtvec;
 /// Specifies the stack size
 #[no_mangle]
 #[link_section = ".stack_buffer"]
-pub static mut STACK_MEMORY: [u8; 0x1000] = [0; 0x1000];
+pub static mut STACK_MEMORY: [u8; 0x4000] = [0; 0x4000];
 
 // Values provided by linker script
 extern "C" {
