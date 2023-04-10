@@ -1,4 +1,4 @@
-use std::{fs, path::PathBuf, vec};
+use std::{borrow::Borrow, fs, path::PathBuf, vec};
 
 use proc_macro::TokenStream;
 use proc_macro2::{Ident, Span};
@@ -318,6 +318,13 @@ fn gen_bitfield(register_description: &RegisterDescription) -> Option<proc_macro
             .clone()
             .unwrap_or("<no documentation>".to_owned())
     });
+    let field_vals = fields.iter().map(|f_desc| {
+        if let Some(vals) = f_desc.values.borrow() {
+            gen_field_values(vals)
+        } else {
+            quote!()
+        }
+    });
 
     if fields.is_empty() {
         None
@@ -327,11 +334,31 @@ fn gen_bitfield(register_description: &RegisterDescription) -> Option<proc_macro
             pub #reg_name [
                 #(
                     #[doc = #docs]
-                    #names OFFSET(#offsets) NUMBITS(#numbits) []
+                    #names OFFSET(#offsets) NUMBITS(#numbits) [ #field_vals ]
                 ),*
             ]
         ))
     }
+}
+
+fn gen_field_values(field_values: &Vec<FieldValue>) -> proc_macro2::TokenStream {
+    let names = field_values
+        .iter()
+        .map(|f_desc| format_ident!("{}", f_desc.name));
+    let docs = field_values.iter().map(|f_desc| f_desc.desc.clone());
+    let values = field_values.iter().map(|f_desc| {
+        f_desc
+            .value
+            .parse::<u32>()
+            .expect("Invalid FiledValue Value")
+    });
+
+    quote!(
+        #(
+            #[doc = #docs]
+            #names = #values
+        ),*
+    )
 }
 
 fn extract_start(s: &str) -> usize {
@@ -423,4 +450,13 @@ struct FieldDescription {
     name: Option<String>,
     desc: Option<String>,
     resval: Option<String>,
+    #[serde(rename = "enum")]
+    values: Option<Vec<FieldValue>>,
+}
+
+#[derive(Deserialize, Debug)]
+struct FieldValue {
+    name: String,
+    value: String,
+    desc: String,
 }
