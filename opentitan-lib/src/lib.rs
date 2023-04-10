@@ -1,17 +1,23 @@
 #![no_std]
 #![no_main]
 #![feature(naked_functions)]
+#![feature(custom_test_frameworks)]
+#![test_runner(crate::tests::test_runner)]
+#![reexport_test_harness_main = "test_main"]
 
 pub mod devices;
 pub mod interrupt;
 pub mod print;
 pub mod synch;
 
+#[cfg(test)]
+pub mod tests;
+
 #[cfg(feature = "alloc")]
 mod alloc;
 mod atomic;
 
-use core::{arch::asm, panic::PanicInfo, ptr};
+use core::{arch::asm, ptr};
 pub use opentitan_macros::entry;
 use riscv::register::mtvec;
 
@@ -129,26 +135,40 @@ pub unsafe extern "C" fn _init() -> ! {
     #[cfg(feature = "verbose_logging")]
     log!("Finished library initialization, jumping to entry");
 
+    #[cfg(test)]
+    {
+        test_main();
+        suspend();
+    }
+    #[cfg(not(test))]
     unsafe {
         asm!("j main", options(noreturn));
     }
 }
 
-#[panic_handler]
-pub fn _default_panic_handler(info: &PanicInfo) -> ! {
-    use core::fmt::Write;
-    unsafe {
-        riscv::interrupt::disable();
-        let mut out = devices::uart::get_panic_uart();
-        let _ = writeln!(out, "[Panic] {}", info);
+#[inline]
+pub fn suspend() -> ! {
+    loop {
+        unsafe {
+            asm!("wfi");
+        }
+    }
+}
 
-        asm!(
-            "
-            100: 
-            wfi
-            j 100b
-            ",
-            options(noreturn)
-        );
+#[cfg(not(test))]
+mod panic {
+    use crate::{devices, suspend};
+    use core::panic::PanicInfo;
+
+    #[panic_handler]
+    pub fn _default_panic_handler(info: &PanicInfo) -> ! {
+        use core::fmt::Write;
+        unsafe {
+            riscv::interrupt::disable();
+            let mut out = devices::uart::get_panic_uart();
+            let _ = writeln!(out, "[Panic] {}", info);
+
+            suspend();
+        }
     }
 }

@@ -187,3 +187,40 @@ impl AesRaw for AesRegisters {
 }
 
 pub trait Aes {}
+
+#[cfg(test)]
+mod tests {
+    use crate::devices::aes::{self, AesRaw};
+
+    #[test_case]
+    fn basic() {
+        unsafe {
+            let aes_mod = aes::get_aes_raw();
+
+            (*aes_mod).configure(
+                aes::Mode::CTR { iv: [0, 0, 0, 0] },
+                aes::Operation::Encrypt,
+                aes::KeyLength::Aes256,
+                &[0, 0, 0, 0, 0, 0, 0, 0],
+                &[0, 0, 0, 0, 0, 0, 0, 0],
+            );
+
+            let plain = [32; 8];
+            let mut encrypted = [0; 8];
+            let mut decrypted = [0; 8];
+
+            (*aes_mod).execute(&plain, &mut encrypted);
+            (*aes_mod).deinitialize();
+            (*aes_mod).configure(
+                aes::Mode::CTR { iv: [0, 0, 0, 0] },
+                aes::Operation::Decrypt,
+                aes::KeyLength::Aes256,
+                &[0, 0, 0, 0, 0, 0, 0, 0],
+                &[0, 0, 0, 0, 0, 0, 0, 0],
+            );
+            (*aes_mod).execute(&encrypted, &mut decrypted);
+
+            assert_eq!(plain, decrypted);
+        }
+    }
+}
