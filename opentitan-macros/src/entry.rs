@@ -53,7 +53,16 @@ pub fn entry(args: TokenStream, input: TokenStream) -> TokenStream {
         #[export_name = "main"]
         #(#attrs)*
         pub extern "C" #unsafety fn __opentitan_lib__main() -> ! {
-            #(#stmts)*
+            #[cfg(test)]
+            unsafe {
+                opentitan_lib::tests::_USE_TEST_PANIC_HANDLER = true;
+                __ot_lib_test_main();
+                opentitan_lib::suspend();
+            }
+            #[cfg(not(test))]
+            {
+                #(#stmts)*
+            }
         }
     )
     .into()

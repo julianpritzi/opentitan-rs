@@ -2,6 +2,11 @@ use core::panic::PanicInfo;
 
 use crate::{devices, print, println, suspend};
 
+#[cfg(test)]
+pub static mut _USE_TEST_PANIC_HANDLER: bool = true;
+#[cfg(not(test))]
+pub static mut _USE_TEST_PANIC_HANDLER: bool = false;
+
 /// Signal to the testing suite that the current test is skipped
 #[macro_export]
 macro_rules! mark_test_as_skipped {
@@ -46,9 +51,8 @@ pub fn test_runner(tests: &[&dyn TestFunction]) {
     println!("All tests passed!");
 }
 
-/// Automatically called when the suite tests fail/panic
-#[panic_handler]
-fn panic(info: &PanicInfo) -> ! {
+/// called when the suite tests fail/panic
+pub(crate) fn panic(info: &PanicInfo) -> ! {
     use core::fmt::Write;
     unsafe {
         riscv::interrupt::disable();

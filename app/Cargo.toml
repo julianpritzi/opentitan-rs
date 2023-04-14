@@ -7,4 +7,4 @@ edition = "2021"
 
 [dependencies]
 p256 = { version = "*", default-features = false, features = ["ecdsa"] }
-opentitan-lib = { path = "../opentitan-lib" }
+opentitan-lib = { path = "../opentitan-lib", features = ["test_framework"] }

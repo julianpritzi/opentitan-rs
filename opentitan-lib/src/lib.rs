@@ -10,7 +10,6 @@ pub mod interrupt;
 pub mod print;
 pub mod synch;
 
-#[cfg(test)]
 pub mod tests;
 
 #[cfg(feature = "alloc")]
@@ -155,20 +154,23 @@ pub fn suspend() -> ! {
     }
 }
 
-#[cfg(not(test))]
 mod panic {
-    use crate::{devices, suspend};
+    use crate::{devices, suspend, tests};
     use core::panic::PanicInfo;
 
     #[panic_handler]
     pub fn _default_panic_handler(info: &PanicInfo) -> ! {
-        use core::fmt::Write;
-        unsafe {
-            riscv::interrupt::disable();
-            let mut out = devices::uart::get_panic_uart();
-            let _ = writeln!(out, "[Panic] {}", info);
+        if unsafe { tests::_USE_TEST_PANIC_HANDLER } {
+            tests::panic(info)
+        } else {
+            use core::fmt::Write;
+            unsafe {
+                riscv::interrupt::disable();
+                let mut out = devices::uart::get_panic_uart();
+                let _ = writeln!(out, "[Panic] {}", info);
 
-            suspend();
+                suspend();
+            }
         }
     }
 }
